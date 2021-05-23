@@ -1,3 +1,4 @@
+const ErrorResponse = require("../helper/errorResponse");
 const Autor = require("../models/Autor");
 
 exports.crearAutor = async (req, res, next) => {
@@ -9,7 +10,7 @@ exports.crearAutor = async (req, res, next) => {
       data: autorData,
     });
   } catch (err) {
-    res.status(400).json({ status: 400, mensaje: err });
+    next(new ErrorResponse("No es posible crear el autor", +err.message, 404));
   }
 };
 
@@ -18,16 +19,32 @@ exports.getAutor = async (req, res, next) => {
     const autorLista = await Autor.find(); // te devuelve el id generado de mongo db
     res.status(200).json(autorLista);
   } catch (err) {
-    res.status(400).json({ status: 400, mensaje: err });
+    next(
+      new ErrorResponse("No se pudo procesar el request", +err.message, 404)
+    );
   }
 };
 
 exports.getAutorById = async (req, res, next) => {
   try {
     const autor = await Autor.findById(req.params.id); // te devuelve el id generado de mongo db
+
+    if (!autor) {
+      return next(
+        new ErrorResponse(
+          "El autor no existe en la bd con este id",
+          +req.params.id,
+          404
+        )
+      );
+    }
+
     res.status(200).json(autor);
   } catch (err) {
-    res.status(400).json({ status: 400, mensaje: err });
+    next(
+      new ErrorResponse("El autor no existe con este id", +req.params.id, 404)
+    );
+    //res.status(400).json({ status: 400, mensaje: err });
   }
 };
 
@@ -35,11 +52,19 @@ exports.updateAutor = async (req, res, next) => {
   try {
     const autor = await Autor.findByIdAndUpdate(req.params.id, req.body); // te devuelve el id generado de mongo db
     if (!autor) {
-      return res.status(400).json({ status: 400 });
+      next(
+        new ErrorResponse("El autor no existe con este id", +req.params.id, 404)
+      );
     }
     res.status(200).json({ status: 200, data: autor });
   } catch (err) {
-    res.status(400).json({ status: 400, mensaje: err });
+    next(
+      new ErrorResponse(
+        "El autor no se pudo actualizar con este id",
+        +req.params.id,
+        404
+      )
+    );
   }
 };
 
@@ -47,10 +72,14 @@ exports.deleteAutor = async (req, res, next) => {
   try {
     const autor = await Autor.findByIdAndDelete(req.params.id); // te devuelve el id generado de mongo db
     if (!autor) {
-      return res.status(400).json({ status: 400 });
+      next(
+        new ErrorResponse("El autor no existe con este id", +req.params.id, 404)
+      );
     }
     res.status(200).json({ status: 200 });
   } catch (err) {
-    res.status(400).json({ status: 400, mensaje: err });
+    next(
+      new ErrorResponse("El autor no existe con este id 2", +req.params.id, 404)
+    );
   }
 };

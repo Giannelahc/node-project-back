@@ -26,11 +26,14 @@ const {
   crearLibro,
   eliminarLibro,
   getLibros,
-  getLibro,
+  getLibroById,
+  pagination,
 } = require("../controllers/libro");
 
 ruta.route("/").get(getLibros).post(crearLibro);
 
-ruta.route("/:id").get(getLibro).put(eliminarLibro);
+ruta.route("/:id").get(getLibroById).put(eliminarLibro);
+
+ruta.route("/pagination").post(pagination);
 
 module.exports = ruta;
